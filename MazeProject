@@ -1,0 +1,207 @@
+// Maze.project.cpp : Defines the entry point for the console application.
+//fatemehToosi.9813200048
+
+//#include "stdafx.h"
+#include <iostream>
+#include <stack>
+#include<string.h>
+
+using namespace std;
+
+//================================Variables===========================
+enum Direction
+{
+	_right, _down, _left, _up
+};
+
+int width, height;
+bool isfinished = false;
+Direction trydr;// = _down;
+stack<Direction> path;
+int x, y;
+char *_map;// copy maze
+		   //================================Functions===========================
+void backMove()
+{
+	if (x == 1 && y == 1)
+	{
+		isfinished = true;
+		return;
+	}
+	trydr = path.top();
+	path.pop();
+	if (trydr == _down)
+	{
+		y--;
+		return;
+	}
+	if (trydr == _right)
+	{
+		x--;
+		return;
+	}
+	if (trydr == _left)
+	{
+		x++;
+		return;
+	}
+	if (trydr == _up)
+	{
+		y++;
+		return;
+	}
+}
+//===========================================================
+void nextMove()//Direction dr = down)
+{
+	if (trydr == _down)
+	{
+		if (x == width && (y + 1) == height)
+		{
+			y++;
+			path.push(_down);
+			isfinished = true;
+			return;
+		}
+		if (_map[(y + 1)*(width + 2) + x] == '0')
+		{
+			y++;
+			_map[y*(width + 2) + x] = '*';
+			path.push(_down);
+			trydr = _right;
+			return;
+		}
+		else
+		{
+			trydr = _left;
+			return;
+		}
+	}
+	if (trydr == _right)
+	{
+		if ((x + 1) == width && y == height)
+		{
+			x++;
+			path.push(_right);
+			isfinished = true;
+			return;
+		}
+		if (_map[y*(width + 2) + x + 1] == '0')
+		{
+			x++;
+			_map[y*(width + 2) + x] = '*';
+			path.push(_right);
+			trydr = _right;
+			return;
+		}
+		else
+		{
+			trydr = _down;
+			return;
+		}
+	}
+	if (trydr == _left)
+	{
+		if ((x - 1) == width && y == height)
+		{
+			x--;
+			path.push(_left);
+			isfinished = true;
+			return;
+		}
+		if (_map[y*(width + 2) + x - 1] == '0')
+		{
+			x--;
+			_map[y*(width + 2) + x] = '*';
+			path.push(_left);
+			trydr = _down;
+			return;
+		}
+		else
+		{
+			trydr = _up;
+			return;
+		}
+	}
+	if (trydr == _up)
+	{
+		if (x == width && (y - 1) == height)
+		{
+			y--;
+			path.push(_up);
+			isfinished = true;
+			return;
+		}
+		if (_map[(y - 1)*(width + 2) + x] == '0')
+		{
+			y--;
+			_map[y*(width + 2) + x] = '*';
+			path.push(_up);
+			trydr = _right;
+			return;
+		}
+		else
+		{
+			backMove();
+		}
+	}
+}
+//===========================================================
+int main()
+{
+	cin >> width;
+	height = width;
+	char *maze = new char[(height + 2)*(width + 2)];
+	_map = new char[(height + 2)*(width + 2)];
+	for (int i = 1; i <= height; i++)
+		for (int j = 1; j <= width; j++)
+		{
+			cin >> maze[(width + 2)*i + j];
+		}
+	for (int i = 0; i <= width + 1; i++)
+	{
+		maze[i] = '1';
+		maze[(height + 1)*(width + 2) + i] = '1';
+	}
+	for (int j = 1; j <= height; j++)
+	{
+		maze[j*(width + 2)] = '1';
+		maze[(j + 1)*(width + 2) - 1] = '1';
+	}
+	memcpy(_map, maze,(width + 2)*(height + 2));
+	x = 1;
+	y = 1;
+	while (!path.empty()) path.pop();
+	isfinished = false;
+	trydr = _right;
+	while (!isfinished)
+		nextMove();
+
+	if (x == width && y == height)
+	{
+		stack<Direction> tmppath;
+		while (!path.empty())
+		{
+			tmppath.push(path.top());
+			path.pop();
+		}
+
+		x = 1;
+		y = 1;
+		cout << 1 << ' ';
+		while (!tmppath.empty())
+		{
+			trydr = tmppath.top();
+			tmppath.pop();
+			if (trydr == _down) y++;
+			else if (trydr == _right) x++;
+			else if (trydr == _left) x--;
+			else if (trydr == _up) y--;
+			cout << (y - 1)*width + x << ' ';
+		}
+	}
+	else cout << -1;
+	delete[] _map;
+	delete[] maze;
+	return 0;
+}
